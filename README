@@ -1,0 +1,178 @@
+Numerical Tools for K- -> l'+ l'- l- nu_l Decays
+================================================
+
+This package provides numerical tools to study the rare four-body decay
+
+    K- -> l'+ l'- l- nu_l
+
+It allows you to:
+
+1) Compute total branching fractions using numerical phase-space integration
+2) Evaluate the squared matrix element at any chosen phase-space point
+3) Use Chiral Perturbation Theory (ChPT) O(p^4) form factors.
+4) NOT PRESENT YET: Use the form factors obtained on the lattice.
+
+The file main.cpp is ONLY an example driver. It shows how to use the library. Please take a look at the file!!
+In normal usage, you will call the functions directly from your own code.
+
+
+--------------------------------------------------------------------
+MAIN FUNCTIONS
+--------------------------------------------------------------------
+
+1) Total Branching Fractions
+----------------------------
+
+Function:
+
+    double Num_Integrate_Decay_Rate(std::string mode);
+
+Computes the branching fraction for
+
+    K- -> l'+ l'- l- nu_l
+
+The argument "mode" selects which contributions are included:
+
+  PT
+      Point-like approximation
+
+  TOTAL
+      Full branching fraction using ChPT form factors at O(p^4)
+      (reproduces hep-ph/9209261 when inputs match)
+
+  QUADRATIC
+      Keeps only terms quadratic in structure-dependent form factors:
+      proportional to H1^2, H2^2, FA^2, FV^2
+
+  INTERFERENCE
+      Keeps only interference terms proportional to:
+      fK * H1, fK * H2, fK * FA, fK * FV
+
+
+Input Parameters and Cuts
+-------------------------
+
+All physical inputs (masses, CKM Vus, etc.) are defined in:
+
+    Num_integrate_l4_decay_rate.cpp
+
+To use the exact inputs of hep-ph/9209261, set:
+
+    Switch_Bij_INPUT = true;
+
+A lower cut is assumed on
+
+    xk = sqrt(k^2) / MK
+
+The cut values are controlled by:
+
+    cut_ee   (for e+ e- final states)
+    cut_mumu (for mu+ mu- final states)
+
+These are also defined in Num_integrate_l4_decay_rate.cpp.
+
+
+--------------------------------------------------------------------
+2) Squared Matrix Element at a Phase Space Point
+--------------------------------------------------------------------
+
+Function:
+
+    double Get_squared_mat_el(
+        double xk,
+        double xq,
+        double y12,
+        double y34,
+        double phi,
+        double rl,
+        double rll,
+        const function<complex<double>(double,double)> &H1,
+        const function<complex<double>(double,double)> &H2,
+        const function<complex<double>(double,double)> &FA,
+        const function<complex<double>(double,double)> &FV,
+        std::string mode
+    );
+
+This returns the quantity defined in Eq. (71) of:
+
+    arXiv:2202.03833
+
+expressed in terms of the variables (xk, xq, y12, y34, phi).
+
+
+Kinematic Variables
+-------------------
+
+MK = kaon mass
+
+    xk  = sqrt(k^2) / MK      invariant mass of l'+ l'- pair
+    xq  = sqrt(q^2) / MK      invariant mass of l- nu_l pair
+    y12, y34, phi             defined in Eq. (68) of arXiv:2202.03833
+
+Mass ratios:
+
+    rl  = (m_l  / MK)^2
+    rll = (m_l' / MK)^2
+
+
+IMPORTANT PHASE SPACE NOTE
+--------------------------
+
+The function Get_squared_mat_el returns the integrand written in the
+variables:
+
+    (xk, xq, y12, y34, phi)
+
+The relation between
+
+    (dxk)(dxq)(dy12)(dy34)(dphi)
+
+and the four-body phase space element dPhi_4 is given in Eq. (67) of:
+
+    arXiv:2202.03833
+
+IF YOU WANT:
+
+    dGamma / dPhi_4
+
+YOU MUST MULTIPLY the output of Get_squared_mat_el by the appropriate
+Jacobian factor described in Eq. (67).
+
+
+--------------------------------------------------------------------
+3) ChPT Form Factors
+--------------------------------------------------------------------
+
+Call:
+
+    function<complex<double>(double,double)> H1, H2, FA, FV;
+    Compute_ChPT_form_factors(H1, H2, FA, FV);
+
+This fills H1, H2, FA, FV with the O(p^4) ChPT predictions.
+You may also supply your own form-factor parameterizations.
+
+
+--------------------------------------------------------------------
+EXAMPLE INCLUDED
+--------------------------------------------------------------------
+
+main.cpp includes a full working example for:
+
+    K- -> e+ e- mu- nu_mu
+
+
+--------------------------------------------------------------------
+BUILDING
+--------------------------------------------------------------------
+
+make 
+
+**please note you need the gsl libraries**
+
+--------------------------------------------------------------------
+RUNNING
+--------------------------------------------------------------------
+
+The demo requires no command-line arguments:
+
+    ./Klnull

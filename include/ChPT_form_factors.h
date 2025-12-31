@@ -1,0 +1,16 @@
+#ifndef __ChPT_form_factors__
+#define __ChPT_form_factors__
+
+
+
+#include "numerics.h"
+
+using namespace std;
+
+complex<double> H(double xk2, double m, double mu);
+void Compute_ChPT_form_factors( function<complex<double>(double,double)>& H1, function<complex<double>(double,double)>& H2, function<complex<double>(double,double)>& FA, function<complex<double>(double,double)>& FV);
+
+
+
+
+#endif 

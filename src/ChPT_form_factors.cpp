@@ -1,0 +1,84 @@
+#include "../include/ChPT_form_factors.h"
+
+
+using namespace std;
+
+using namespace std::complex_literals;
+
+const double M_k = 0.493646; // 0.493677;
+const double M_Rho = 0.770 ;
+const double mu1= M_Rho;
+const double M_pi = 0.13956755;
+const double f_k =  0.1136*sqrt(2.0); //    0.1565 ;
+const double f_pi = 0.0932*sqrt(2.0); //  0.1304; ;
+const double f_chir = f_k;
+const double l10 = -0.0055; //NNLO -0.0038
+const double l9 = 0.0069; //NNLO 0.0059
+const double tol= 1.0e-25;
+
+complex<double> H(double xk2, double m, double mu) {
+
+
+  complex<double> H_val;
+  
+  
+  double k = (1.0/(32.0*M_PI*M_PI))*(2.0*log( m/mu) + 1.0);
+  
+  auto F_RE= [&](double x) {
+
+	    complex<double> z{1.0- (xk2/pow(m,2))*x*(1.0-x),0.0};
+
+	    return real(log(z));
+
+	  };
+
+  auto F_IM= [&](double x) {
+
+	    complex<double> z{1.0- (xk2/pow(m,2))*x*(1.0-x),0.0};
+
+	    return imag(log(z));
+
+	  };
+
+  double J_RE=0.0; double err_J_RE;
+  double J_IM=0.0; double err_J_IM;
+
+
+  complex<double> J{J_RE,J_IM};
+  J = -(1.0/(16.0*M_PI*M_PI))*J;
+  
+  complex<double> kr2{1.0 - 4.0*m*m/xk2,0.0};
+
+  double kr2_d = 1 - 4.0*m*m/xk2;
+  
+  complex<double> kr = sqrt(kr2);
+  
+  complex<double> zdual = (1.0+kr)*(1.0+kr)/( (1.0-kr)*(1.0-kr));
+
+  complex<double> zdual_e = (kr+1.0)/(kr-1.0);
+
+  complex<double> JIII =  (1.0/(32.0*M_PI*M_PI))*(4.0 - 2.0*kr*log(zdual_e));
+
+  
+  H_val = (2.0/3.0)*l9 + (1.0/12.0)*(1.0 - 4.0*pow(m,2)/xk2)*JIII + (1.0/(288.0*M_PI*M_PI))  - k/6.0;
+
+  
+  return H_val;
+
+
+}
+
+void Compute_ChPT_form_factors( function<complex<double>(double,double)>& H1, function<complex<double>(double,double)>& H2, function<complex<double>(double,double)>& FA, function<complex<double>(double,double)>& FV) {
+
+  
+  auto def_FA = [&](double xk, double xq) -> complex<double> { return complex<double>((8.0*M_k/f_pi)*(l9 + l10),0.0);   };
+  auto def_FV = [&](double xk, double xq) -> complex<double> { return complex<double>(M_k/(4.0*(pow(M_PI,2))*f_pi),0);};
+  auto def_H =  [&](double xk, double xq) -> complex<double> { return (2*M_k*f_k)*(    (2.0/(f_pi*f_pi))*H(pow(M_k*xk,2),M_pi, M_Rho) + 2.0*(2.0/(f_pi*f_pi))*H(pow(M_k*xk,2),M_k,M_Rho));};
+
+  FA= def_FA;
+  FV= def_FV;
+  H1= def_H;
+  H2= def_H;
+
+  return;
+}
