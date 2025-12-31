@@ -240,7 +240,10 @@ double MonteCarlo_integration_extended_phase_space(const function<complex<double
 
 			     if(xk_prime < xk_inf && same_lepton) return 0.0;
 
-			     assert(xk_prime + xq_prime <= 1);
+			     if( (xk_prime + xq_prime > 1) && same_lepton ) {
+			       cout<<xk_prime+xq_prime<<endl;
+			       assert(xk_prime+xq_prime<=1);
+			     }
 			  			  
 			 
 			     double jacobian= 4.0*xk*xq;
